@@ -20,7 +20,7 @@ CREATE TABLE `sportsball`.`player` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `full_name` VARCHAR(45) NOT NULL,
   `team_id` BIGINT NULL,
-  `field_position` BIGINT NOT NULL,
+  `field_position` INT NOT NULL,
   PRIMARY KEY (`id`));
 
 --create player transition table
