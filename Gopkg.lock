@@ -8,6 +8,21 @@
   version = "v1.0.4"
 
 [[projects]]
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
+  revision = "a0583e0143b1624142adab07e0e97fe106d99561"
+  version = "v1.3"
+
+[[projects]]
+  name = "github.com/quipo/statsd"
+  packages = [
+    ".",
+    "event"
+  ]
+  revision = "977fadbd5cda9975ab87279994ea2029efdbd436"
+  version = "1.4.0"
+
+[[projects]]
   name = "goji.io"
   packages = [
     ".",
@@ -36,6 +51,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2efce2ced3d2ed44824e9250c7546ca23d18c9495bdea732ea493d7c5e3f5703"
+  inputs-digest = "d3b7b88174f103fd946f58f336414d23f8de5600f88f23445c6a598402c55299"
   solver-name = "gps-cdcl"
   solver-version = 1

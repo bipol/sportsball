@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/bipol/sportsball/config"
 	ctx "github.com/bipol/sportsball/context"
 	"github.com/bipol/sportsball/handlers"
@@ -8,6 +9,12 @@ import (
 	"goji.io/pat"
 	"net/http"
 )
+
+//Hello is just a hello world func
+func hello(w http.ResponseWriter, r *http.Request) {
+	name := pat.Param(r, "name")
+	fmt.Fprintf(w, "Hello, %s!", name)
+}
 
 func main() {
 	conf := config.New()
@@ -18,7 +25,15 @@ func main() {
 	}
 
 	mux := goji.NewMux()
-	mux.HandleFunc(pat.Get("/hello/:name"), handlers.Hello)
+	api := handlers.APIMux(appContext)
 
-	http.ListenAndServe("localhost:8000", mux)
+	mux.Handle(pat.New("/api/*"), api)
+
+	mux.HandleFunc(pat.Get("/hello/:name"), hello)
+
+	if err = http.ListenAndServe("localhost:8000", mux); err != nil {
+		panic(err)
+	}
+
+	appContext.Logger.Info("Server started on 8000")
 }

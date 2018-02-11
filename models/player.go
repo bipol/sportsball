@@ -18,17 +18,14 @@ const (
 	CM FieldPosition = 5
 	//F = Forward
 	F FieldPosition = 6
+	//GK = Goal Keeper
+	GK FieldPosition = 7
 )
 
 //Player represents who is on a team
 type Player struct {
 	Position FieldPosition `json:"field_position"`
 	FullName string        `json:"full_name"`
-	ID       int           `json:"id"`
-	Team     Team          `json:"team"`
-}
-
-//New will instantiate a new player
-func (Player) New(fp FieldPosition, name string, team Team) (Player, error){
-	return Player{fp, name, 0, team}, nil
+	ID       int64           `json:"id"`
+	Team     int64          `json:"team"`
 }

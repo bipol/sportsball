@@ -21,18 +21,26 @@ type Config struct {
 func New() Config {
 
 	// Database related
-	databaseHost := os.Getenv("MCCOY_DB_HOST")
-	databasePort := os.Getenv("MCCOY_DB_PORT")
-	databaseName := os.Getenv("MCCOY_DB_NAME")
-	databaseUser := os.Getenv("MCCOY_DB_USER")
-	databasePassword := os.Getenv("MCCOY_DB_PASS")
+	databaseHost := os.Getenv("DB_HOST")
+	databasePort := os.Getenv("DB_PORT")
+	databaseName := os.Getenv("DB_NAME")
+	databaseUser := os.Getenv("DB_USER")
+	databasePassword := os.Getenv("DB_PASS")
+
+	databaseHost = "localhost"
+	databasePort = "3306"
+	databaseName = "sportsball"
+	databaseUser = "root"
+	databasePassword = "example"
+
 	databaseURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", databaseUser, databasePassword, databaseHost, databasePort, databaseName)
 
 	// Stats
 	statsdHost := os.Getenv("STATSD_HOST")
 	statsdPrefix := os.Getenv("STATSD_PREFIX")
 
-	users := os.Getenv("USERS")
+	statsdHost = "localhost:8125"
+	statsdPrefix = "sportsball"
 
 	conf := Config{
 		DatabaseHost: databaseHost,

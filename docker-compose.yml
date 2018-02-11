@@ -2,7 +2,6 @@
 version: '3.1'
 
 services:
-
   db:
     image: mysql
     restart: always
@@ -10,4 +9,11 @@ services:
       MYSQL_ROOT_PASSWORD: example
     ports:
       - "3306:3306"
+  statsd:
+    image: jaconel/statsd
+    restart: always
+    ports:
+      - "8125:8125"
+      - "8126:8126"
+
 

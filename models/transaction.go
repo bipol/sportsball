@@ -2,8 +2,8 @@ package models
 
 import (
 	"crypto/sha256"
+	"database/sql"
 	"hash"
-	"sql"
 )
 
 //Transaction outlines a player transfer from one team to the next
