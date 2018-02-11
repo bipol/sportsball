@@ -50,6 +50,14 @@ func createManagerStatement(tx *sql.Tx) (*sql.Stmt, error) {
 	return prepared, err
 }
 
+func associatePlayerWithTeamStatement(tx *sql.Tx) (*sql.Stmt, error) {
+	statement := "INSERT INTO team_player (team, player) VALUES (?, ?)"
+
+	prepared, err := tx.Prepare(statement)
+
+	return prepared, err
+}
+
 func updateManagerStatement(tx *sql.Tx) (*sql.Stmt, error) {
 	statement := "UPDATE team SET manager=? WHERE id=?"
 
@@ -58,7 +66,7 @@ func updateManagerStatement(tx *sql.Tx) (*sql.Stmt, error) {
 	return prepared, err
 }
 
-func (c *DatabaseContext) createTeamReturnID(tx *sql.Tx, name string) (int64, error) {
+func (c *DatabaseContext) createTeam(tx *sql.Tx, name string) (int64, error) {
 	res, err := tx.Exec("INSERT INTO team (name) VALUES (?)", name)
 
 	if err != nil {
@@ -86,7 +94,7 @@ func (c *DatabaseContext) CreateTeam(team *models.CreateTeamBody) error {
 		return fmt.Errorf("Error creating transaction: %s", err)
 	}
 
-	id, err := c.createTeamReturnID(tx, team.Name)
+	id, err := c.createTeam(tx, team.Name)
 
 	if err != nil {
 		return fmt.Errorf("CreateTeamReturnID error: %s", err)
@@ -99,11 +107,30 @@ func (c *DatabaseContext) CreateTeam(team *models.CreateTeamBody) error {
 		return fmt.Errorf("createPlayerStatement error: %s", err)
 	}
 
+	associatePlayerStatement, err := associatePlayerWithTeamStatement(tx)
+	defer associatePlayerStatement.Close()
+
+	if err != nil {
+		return fmt.Errorf("associatePlayerStatement error: %s", err)
+	}
+
 	for _, player := range players {
-		_, err = playerStatement.Exec(player.FullName, id, player.Position)
+		playerRes, err := playerStatement.Exec(player.FullName, id, player.Position)
 
 		if err != nil {
 			return fmt.Errorf("playerStatement error: %s", err)
+		}
+
+		playerID, err := playerRes.LastInsertId()
+
+		if err != nil {
+			return fmt.Errorf("playerID error: %s", err)
+		}
+
+		_, err = associatePlayerStatement.Exec(playerID, id)
+
+		if err != nil {
+			return fmt.Errorf("playerID error: %s", err)
 		}
 	}
 
