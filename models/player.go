@@ -26,6 +26,6 @@ const (
 type Player struct {
 	Position FieldPosition `json:"field_position"`
 	FullName string        `json:"full_name"`
-	ID       int64           `json:"id"`
-	Team     int64          `json:"team"`
+	ID       int64         `json:"id"`
+	Team     int64         `json:"team"`
 }

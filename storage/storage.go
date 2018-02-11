@@ -127,7 +127,7 @@ func (c *DatabaseContext) CreateTeam(team *models.CreateTeamBody) error {
 			return fmt.Errorf("playerID error: %s", err)
 		}
 
-		_, err = associatePlayerStatement.Exec(playerID, id)
+		_, err = associatePlayerStatement.Exec(id, playerID)
 
 		if err != nil {
 			return fmt.Errorf("playerID error: %s", err)
@@ -166,7 +166,7 @@ func (c *DatabaseContext) CreateTeam(team *models.CreateTeamBody) error {
 	}
 
 
-	_, err = managerStatement.Exec(managerID, id)
+	_, err = updateManagerStatement.Exec(managerID, id)
 
 	if err != nil {
 		return fmt.Errorf("Error executing update manager statement: %s", err)
