@@ -34,11 +34,17 @@ func CreateTeam(appContext *context.AppCtx, w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
-	if err = appContext.Database.CreateTeam(team); err != nil {
+	accessKey, err := appContext.Database.CreateTeam(team)
+	if err != nil {
 		appContext.Logger.Errorf("CreateTeam error: %s", err)
 		appContext.Stats.Incr("api.create_team.500", 1)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+
+	jsonBody, err := json.Marshal(models.AccessKeyResponse{accessKey})
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonBody)
+
 	finishMilis := (time.Now().UnixNano() - startNanos) / 1000000
 	appContext.Stats.Timing("api.create_team.response_time", finishMilis)
 }
@@ -60,7 +66,7 @@ func CreatePlayer(appContext *context.AppCtx, w http.ResponseWriter, r *http.Req
 
 //CreatePlayer will build a player from JSON
 func CreateTransaction(appContext *context.AppCtx, w http.ResponseWriter, r *http.Request) {
-    startNanos := time.Now().UnixNano()
-    finishMilis := (time.Now().UnixNano() - startNanos) / 1000000
-    appContext.Stats.Timing("api.create_player.response_time", finishMilis)
+	startNanos := time.Now().UnixNano()
+	finishMilis := (time.Now().UnixNano() - startNanos) / 1000000
+	appContext.Stats.Timing("api.create_player.response_time", finishMilis)
 }
