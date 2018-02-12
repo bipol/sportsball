@@ -64,9 +64,17 @@ func CreatePlayer(appContext *context.AppCtx, w http.ResponseWriter, r *http.Req
 
 }
 
-//CreatePlayer will build a player from JSON
+//CreateTransaction will create a transaction for
 func CreateTransaction(appContext *context.AppCtx, w http.ResponseWriter, r *http.Request) {
 	startNanos := time.Now().UnixNano()
+	accessKey := r.Header.Get("X-Access-Key")
+
+	if accessKey == "" {
+		appContext.Logger.Errorf("CreateTransaction Error: Missing Access Key")
+		appContext.Stats.Incr("api.create_team.400", 1)
+		http.Error(w, "Missing X-Access-Key header", http.StatusBadRequest)
+	}
+
 	finishMilis := (time.Now().UnixNano() - startNanos) / 1000000
 	appContext.Stats.Timing("api.create_player.response_time", finishMilis)
 }
