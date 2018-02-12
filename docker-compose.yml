@@ -13,7 +13,5 @@ services:
     image: jaconel/statsd
     restart: always
     ports:
-      - "8125:8125"
-      - "8126:8126"
-
-
+      - "8125:8125/udp"
+      - "8126:8126/tcp"

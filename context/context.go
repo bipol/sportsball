@@ -35,6 +35,8 @@ func New(conf config.Config) (*AppCtx, error) {
 
 	collector := statsd.NewStatsdBuffer(time.Second*15, client)
 
+	error = client.Incr("app.init", 1)
+
 	if error != nil {
 		return nil, error
 	}

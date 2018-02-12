@@ -57,3 +57,10 @@ func CreatePlayer(appContext *context.AppCtx, w http.ResponseWriter, r *http.Req
 	appContext.Stats.Timing("api.create_player.response_time", finishMilis)
 
 }
+
+//CreatePlayer will build a player from JSON
+func CreateTransaction(appContext *context.AppCtx, w http.ResponseWriter, r *http.Request) {
+    startNanos := time.Now().UnixNano()
+    finishMilis := (time.Now().UnixNano() - startNanos) / 1000000
+    appContext.Stats.Timing("api.create_player.response_time", finishMilis)
+}
