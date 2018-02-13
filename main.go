@@ -10,10 +10,8 @@ import (
 	"net/http"
 )
 
-//Hello is just a hello world func
-func hello(w http.ResponseWriter, r *http.Request) {
-	name := pat.Param(r, "name")
-	fmt.Fprintf(w, "Hello, %s!", name)
+func healthcheck(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "It's alive!")
 }
 
 func main() {
@@ -27,9 +25,10 @@ func main() {
 	mux := goji.NewMux()
 	api := handlers.APIMux(appContext)
 
+	//TODO: Auth around API submux
 	mux.Handle(pat.New("/api/*"), api)
 
-	mux.HandleFunc(pat.Get("/hello/:name"), hello)
+	mux.HandleFunc(pat.Get("/healthcheck"), healthcheck)
 
 	if err = http.ListenAndServe("localhost:8000", mux); err != nil {
 		panic(err)

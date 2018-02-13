@@ -17,4 +17,5 @@ Questions to answer:
 - Deployment? (AWS, Google Cloud, *Kubes*?)
 - Migrations?
 - Other kinds of tooling?
+- Auth?
 - CI?
