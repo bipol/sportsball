@@ -35,12 +35,27 @@ func New(conf config.Config) (*DatabaseContext, error) {
 	return context, nil
 }
 
-//TODO: Implement
-func (db *DatabaseContext) DoesTransactionAlreadyExist(transaction *models.Transaction) (error) {
+//GetTransaction retrieves a transaction from the database
+func (db *DatabaseContext) GetTransaction(transaction *models.Transaction) (*models.Transaction, error) {
+	statement := fmt.Sprintf("SELECT id, from_team_id, to_team_id, player_id FROM transaction WHERE from_team_id=%d and to_team_id=%d and player_id=%d", transaction.FromTeam, transaction.ToTeam, transaction.Player)
+
+	trans := models.Transaction{}
+
+	err := db.Connection.QueryRow(statement).Scan(&trans.ID, &trans.FromTeam, &trans.ToTeam, &trans.Player)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &trans, nil
 }
 
 //GetManagerByAccessKey will retrieve a manager from the database
-func (db *DatabaseContext) CreateTransaction(transaction *models.Transaction) (error) {
+func (db *DatabaseContext) CreateTransaction(transaction *models.Transaction) error {
 	statement := "INSERT INTO transaction (from_team_id, to_team_id, player_id) VALUES (?, ?, ?)"
 
 	_, err := db.Connection.Exec(statement, transaction.FromTeam, transaction.ToTeam, transaction.Player)
@@ -87,7 +102,6 @@ func (db *DatabaseContext) GetPlayer(id int64) (*models.Player, error) {
 
 	return &player, err
 }
-
 
 func createPlayerStatement(tx *sql.Tx) (*sql.Stmt, error) {
 	statement := "INSERT INTO player (full_name, team_id, field_position) VALUES (?, ?, ?)"

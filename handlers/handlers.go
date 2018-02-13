@@ -129,6 +129,24 @@ func CreateTransaction(appContext *context.AppCtx, w http.ResponseWriter, r *htt
 		Player: player.ID,
 	}
 
+
+	exists, err := appContext.Database.GetTransaction(transaction)
+
+	if err != nil {
+		appContext.Logger.Errorf("CreateTransaction error: %s", err)
+		appContext.Stats.Incr("api.create_transaction.500", 1)
+		http.Error(w, "Error retrieving transaction", http.StatusInternalServerError)
+		return
+	}
+
+	if exists != nil {
+		appContext.Logger.Info("Transaction Exists already")
+		appContext.Stats.Incr("api.create_transaction.200", 1)
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		return
+	}
+
 	err = appContext.Database.CreateTransaction(transaction)
 
 	if err != nil {
