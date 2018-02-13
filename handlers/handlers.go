@@ -17,6 +17,10 @@ func APIMux(appContext *context.AppCtx) *goji.Mux {
 		CreateTeam(appContext, w, r)
 	})
 
+	mux.HandleFunc(pat.Post("/transaction"), func(w http.ResponseWriter, r *http.Request) {
+		CreateTransaction(appContext, w, r)
+	})
+
 	return mux
 }
 
@@ -30,15 +34,19 @@ func CreateTeam(appContext *context.AppCtx, w http.ResponseWriter, r *http.Reque
 
 	if err != nil {
 		appContext.Logger.Errorf("CreateTeam error: %s", err)
-		appContext.Stats.Incr("api.create_team.500", 1)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		appContext.Stats.Incr("api.create_team.400", 1)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
 	}
+
+	defer r.Body.Close()
 
 	accessKey, err := appContext.Database.CreateTeam(team)
 	if err != nil {
 		appContext.Logger.Errorf("CreateTeam error: %s", err)
 		appContext.Stats.Incr("api.create_team.500", 1)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
 	jsonBody, err := json.Marshal(models.AccessKeyResponse{accessKey})
@@ -64,7 +72,8 @@ func CreatePlayer(appContext *context.AppCtx, w http.ResponseWriter, r *http.Req
 
 }
 
-//CreateTransaction will create a transaction for
+//CreateTransaction will create a transaction for a player, created by a manager
+// identified with their access key
 func CreateTransaction(appContext *context.AppCtx, w http.ResponseWriter, r *http.Request) {
 	startNanos := time.Now().UnixNano()
 	accessKey := r.Header.Get("X-Access-Key")
@@ -73,6 +82,60 @@ func CreateTransaction(appContext *context.AppCtx, w http.ResponseWriter, r *htt
 		appContext.Logger.Errorf("CreateTransaction Error: Missing Access Key")
 		appContext.Stats.Incr("api.create_team.400", 1)
 		http.Error(w, "Missing X-Access-Key header", http.StatusBadRequest)
+		return
+	}
+
+	manager, err := appContext.Database.GetManagerByAccessKey(accessKey)
+
+	if err != nil {
+		appContext.Logger.Errorf("CreateTransaction error: %s", err)
+		appContext.Stats.Incr("api.create_transaction.404", 1)
+		http.Error(w, "Can't find a manager with that access key", http.StatusNotFound)
+		return
+	}
+
+	jsonDecoder := json.NewDecoder(r.Body)
+	requestTransaction := &models.RequestTransaction{}
+	err = jsonDecoder.Decode(requestTransaction)
+
+	if err != nil {
+		appContext.Logger.Errorf("CreateTransaction error: %s", err)
+		appContext.Stats.Incr("api.create_transaction.400", 1)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	defer r.Body.Close()
+
+	player, err := appContext.Database.GetPlayer(requestTransaction.Player)
+
+	if err != nil {
+		appContext.Logger.Errorf("CreateTransaction error: %s", err)
+		appContext.Stats.Incr("api.create_transaction.404", 1)
+		http.Error(w, "Can't find player under that ID", http.StatusNotFound)
+		return
+	}
+
+	if player.Team == manager.TeamID {
+		appContext.Logger.Errorf("CreateTransaction error: %s", err)
+		appContext.Stats.Incr("api.create_transaction.422", 1)
+		http.Error(w, "Player already assigned to manager", http.StatusUnprocessableEntity)
+		return
+	}
+
+	transaction := &models.Transaction{
+		FromTeam: player.Team,
+		ToTeam: manager.TeamID,
+		Player: player.ID,
+	}
+
+	err = appContext.Database.CreateTransaction(transaction)
+
+	if err != nil {
+		appContext.Logger.Errorf("CreateTransaction error: %s", err)
+		appContext.Stats.Incr("api.create_transaction.500", 1)
+		http.Error(w, "Error creating transaction", http.StatusInternalServerError)
+		return
 	}
 
 	finishMilis := (time.Now().UnixNano() - startNanos) / 1000000

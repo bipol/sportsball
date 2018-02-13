@@ -1,25 +1,14 @@
 package models
 
-import (
-	"crypto/sha256"
-	"database/sql"
-	"hash"
-)
+//RequestTransaction is what is sent to create a transaction
+type RequestTransaction struct {
+	Player   int64 `json:"player_id"`
+}
 
 //Transaction outlines a player transfer from one team to the next
 type Transaction struct {
-	FromTeam int       `json:"from_team_id"`
-	ToTeam   int       `json:"to_team_id"`
-	Player   int       `json:"player_id"`
-	ID       hash.Hash `json:"id"`
-}
-
-//New instantiates a transaction
-func (Transaction) New(fromTeamID int, toTeamID int, playerID int) (Transaction, error) {
-	return Transaction{fromTeamID, toTeamID, playerID, sha256.New()}, nil
-}
-
-//Commit will save the transaction to the db
-func (transaction Transaction) Commit(*sql.DB) (Transaction, error) {
-	return transaction, nil
+	FromTeam int64 `json:"from_team_id"`
+	ToTeam   int64 `json:"to_team_id"`
+	Player   int64 `json:"player_id"`
+	ID       int64 `json:"id,omitempty"`
 }

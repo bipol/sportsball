@@ -35,6 +35,60 @@ func New(conf config.Config) (*DatabaseContext, error) {
 	return context, nil
 }
 
+//TODO: Implement
+func (db *DatabaseContext) DoesTransactionAlreadyExist(transaction *models.Transaction) (error) {
+}
+
+//GetManagerByAccessKey will retrieve a manager from the database
+func (db *DatabaseContext) CreateTransaction(transaction *models.Transaction) (error) {
+	statement := "INSERT INTO transaction (from_team_id, to_team_id, player_id) VALUES (?, ?, ?)"
+
+	_, err := db.Connection.Exec(statement, transaction.FromTeam, transaction.ToTeam, transaction.Player)
+
+	return err
+}
+
+//GetManagerByAccessKey will retrieve a manager from the database
+func (db *DatabaseContext) GetManagerByAccessKey(key string) (*models.Manager, error) {
+	statement := fmt.Sprintf("SELECT id, full_name, team_id FROM manager WHERE access_key='%s'", key)
+
+	row, err := db.Connection.Query(statement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer row.Close()
+
+	manager := models.Manager{}
+
+	row.Next()
+	err = row.Scan(&manager.ID, &manager.FullName, &manager.TeamID)
+
+	return &manager, err
+}
+
+//GetPlayer returns a player from the database
+func (db *DatabaseContext) GetPlayer(id int64) (*models.Player, error) {
+	statement := fmt.Sprintf("SELECT id, full_name, team_id, field_position FROM player WHERE id=%d", id)
+
+	row, err := db.Connection.Query(statement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer row.Close()
+
+	player := models.Player{}
+
+	row.Next()
+	err = row.Scan(&player.ID, &player.FullName, &player.Team, &player.Position)
+
+	return &player, err
+}
+
+
 func createPlayerStatement(tx *sql.Tx) (*sql.Stmt, error) {
 	statement := "INSERT INTO player (full_name, team_id, field_position) VALUES (?, ?, ?)"
 
