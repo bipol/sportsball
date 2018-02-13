@@ -6,7 +6,7 @@ Sportsball is going to be a simple go app mocking player transfers in soccer.
 - [X] Create schemas
 - [X] Add database
 - [X] Insert Team Endpoint to get data in
-- [ ] Come up with transaction endpoint to trade
+- [X] Come up with transaction endpoint to trade
 - [ ] Where the tests at
 - [ ] Add CircleCI
 - [ ] Make sure statsd works
