@@ -157,7 +157,6 @@ func (c *DatabaseContext) CreateTeam(team *models.CreateTeamBody) (string, error
 	}
 
 	tx, err := c.Connection.Begin()
-	defer tx.Rollback()
 
 	if err != nil {
 		return "", fmt.Errorf("Error creating transaction: %s", err)
@@ -245,6 +244,7 @@ func (c *DatabaseContext) CreateTeam(team *models.CreateTeamBody) (string, error
 	err = tx.Commit()
 
 	if err != nil {
+		tx.Rollback()
 		return "", fmt.Errorf("Error commiting transaction: %s", err)
 	}
 
